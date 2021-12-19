@@ -84,7 +84,7 @@ public class Server {
             final Message REQUEST_NAME = new Message(MessageType.NAME_REQUEST);
             Message messageFromClient;
 
-            System.out.println("Name request...");
+            System.out.println("User name request...");
             client_connection.sendMessage(REQUEST_NAME);
             while (true) {
                 try {
@@ -125,15 +125,15 @@ public class Server {
     }
 
     /**
-     * Бродкаст отправка сообщения всем
+     * Бродкаст отправка сообщения всем из мапы
      */
     private static void broadcastForAllClients(Message messageForAll) {
         if (CLIENT_MAP.isEmpty()) {
             System.out.println("No clients in map !");
             return;
         }
-        for (Map.Entry entry : CLIENT_MAP.entrySet()) {
-            ((Connection) entry.getValue()).sendMessage(messageForAll);
+        for (Map.Entry<String, Connection> entry : CLIENT_MAP.entrySet()) {
+            (entry.getValue()).sendMessage(messageForAll);
         }
     }
 
@@ -141,9 +141,9 @@ public class Server {
      * Оповещаем юзера из аргумента о всех юзерах из мапы
      */
     private void notifyUser(Connection connection_client, String userName) {
-        for (Map.Entry entry : CLIENT_MAP.entrySet()) {
+        for (Map.Entry<String, Connection> entry : CLIENT_MAP.entrySet()) {
             if (!(entry.getKey()).equals(userName))
-                ((Connection) entry.getValue()).sendMessage(new Message(MessageType.USER_ADD, (String) entry.getKey()));
+                connection_client.sendMessage(new Message(MessageType.USER_ADD, entry.getKey()));
         }
     }
 }
