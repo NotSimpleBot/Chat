@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Objects;
 
+//обертка для Socket, что бы работать с сериализацией
 public class Connection {
     private final Socket socket;
     private final ObjectOutputStream oos;
