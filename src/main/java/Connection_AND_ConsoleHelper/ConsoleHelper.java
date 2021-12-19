@@ -14,7 +14,7 @@ public class ConsoleHelper {
     }
 
 
-    public String getStringFromConsole() {
+    public static String getStringFromConsole() {
         String tmp_Str = null;
         try {
             tmp_Str = reader.readLine();
@@ -26,7 +26,7 @@ public class ConsoleHelper {
     }
 
 
-    public Integer getIntFromConsole() {
+    public static Integer getIntFromConsole() {
         Integer int_tmp = null;
         int count = 0;
 

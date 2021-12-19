@@ -3,6 +3,7 @@ package Connection_AND_ConsoleHelper;
 
 import Message.Message;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,7 +11,7 @@ import java.net.Socket;
 import java.util.Objects;
 
 //обертка для Socket, что бы работать с сериализацией
-public class Connection {
+public class Connection implements Closeable {
     private final Socket socket;
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
@@ -41,6 +42,14 @@ public class Connection {
         synchronized (ois) {
             return (Message) ois.readObject();
         }
+    }
+
+
+    @Override
+    public void close() throws IOException {
+            ois.close();
+            oos.close();
+            socket.close();
     }
 }
 
