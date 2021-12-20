@@ -137,6 +137,7 @@ public class Server {
                 }
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
+                return;
             }
         }
     }

@@ -10,7 +10,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Objects;
 
-//обертка для Socket, что бы работать с сериализацией
+//обертка для Socket, так как через Сокеты будем передавать объекты, то нужно сериализовать
 public class Connection implements Closeable {
     private final Socket socket;
     private final ObjectOutputStream oos;
@@ -25,7 +25,9 @@ public class Connection implements Closeable {
     }
 
 
-    //отправить
+    /**
+     * Отправка сообщения (сериализованного объекта Message)
+     */
     public void sendMessage(Message message) {
         synchronized (oos) {
             try {
@@ -37,7 +39,9 @@ public class Connection implements Closeable {
         }
     }
 
-    //получить
+    /**
+     * Получение сообщения (десириализация объекта Message)
+     */
     public Message receive() throws IOException, ClassNotFoundException {
         synchronized (ois) {
             return (Message) ois.readObject();
@@ -47,9 +51,9 @@ public class Connection implements Closeable {
 
     @Override
     public void close() throws IOException {
-            ois.close();
-            oos.close();
-            socket.close();
+        ois.close();
+        oos.close();
+        socket.close();
     }
 }
 
