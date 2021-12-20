@@ -6,6 +6,7 @@ import Message.Message;
 import Message.MessageType;
 
 import java.io.IOException;
+import java.net.Socket;
 
 public class Client_Console {
     protected Connection connectionWithServer;
@@ -19,14 +20,24 @@ public class Client_Console {
 
 
     //----------------------------------------------------------------------------------------------------------
-    protected class Client_Console_Connection_With_Server extends Thread {
-        //TODO установка соединения с сервером
-
-
+    protected class ProcessConnectionWithServer extends Thread {
 
         @Override
         public void run() {
-            //TODO коннект к серверу, основной метод
+            System.out.println("Running client...");
+
+            String server_address = Client_Console.this.getServerAddress();
+            Integer server_port = Client_Console.this.getServerPort();
+
+            try {
+                connectionWithServer = new Connection(new Socket(server_address, server_port));
+
+                clientHandShake(connectionWithServer);
+                mainClientLoopForMessageFromServer();
+            } catch (IOException | ClassNotFoundException e) {
+                setConnectionStatus(false);
+                e.printStackTrace();
+            }
         }
 
 
@@ -66,28 +77,56 @@ public class Client_Console {
             }
         }
 
-        /***/
-        protected void mainClientLoopForMessageFromServer(){
+        /**
+         * Метод содержит бесконечный цикл, для ожидания сообщений от сервера, в зависимости от
+         * типа принятого сообщения - будет произведен вывод соответствующей информации (в этом случае в консоль) с помощью
+         * соответствующих методов...
+         */
+        protected void mainClientLoopForMessageFromServer() throws IOException, ClassNotFoundException {
             Message messageFromServer;
-            while (true){
-                try {
-                    messageFromServer = connectionWithServer.receive();
-                    if (messageFromServer != null){
-                        MessageType messageFromServerType = messageFromServer.getType();
-                        if (messageFromServerType == MessageType.TEXT){
-        //TODO
+
+            while (true) {
+                messageFromServer = connectionWithServer.receive();
+                if (messageFromServer != null) {
+                    MessageType messageFromServerType = messageFromServer.getType();
+                    if (messageFromServerType == MessageType.TEXT) {
+                        incomingMessage(messageFromServer);
+                    } else {
+                        if (messageFromServerType == MessageType.USER_ADD) {
+                            incomingMessageAddUser(messageFromServer);
+                        } else if (messageFromServerType == MessageType.USER_DELETE) {
+                            incomingMessageRemoveUser(messageFromServer);
+                        } else {
+                            connectionWithServer.close();
+                            throw new IOException("Something wrong with message");
                         }
                     }
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
                 }
             }
         }
 
-        /**Вывод сообщения с сервера в консоль.*/
-        protected void incomingMessage(Message messageFromServer){
+        /**
+         * Вывод сообщения с сервера в консоль.
+         */
+        protected void incomingMessage(Message messageFromServer) {
             String message = messageFromServer.getData();
             ConsoleHelper.printInConsole(message);
+        }
+
+        /**
+         * Вывод инфы о добавленном юзере в консоль
+         */
+        protected void incomingMessageAddUser(Message messageFromServer) {
+            String message = messageFromServer.getData();
+            System.out.println("New user '" + messageFromServer.getData() + "' connected");
+        }
+
+        /**
+         * Вывод инфы об удаленном юзере
+         */
+        protected void incomingMessageRemoveUser(Message messageFromServer) {
+            String message = messageFromServer.getData();
+            System.out.println("User '" + message + "' was deleted");
         }
 
 
@@ -102,9 +141,6 @@ public class Client_Console {
                 Client_Console.this.notify();
             }
         }
-
-
-        //TODO дописать методы для вывода сообщений с сервера в консоль
     }
     //----------------------------------------------------------------------------------------------------------
 
@@ -112,15 +148,50 @@ public class Client_Console {
      * Основной метод для запуска клиента
      */
     protected void start() {
-        //TODO
+        synchronized (this) {
+            ProcessConnectionWithServer connection = getConnectionWithServer();
+            connection.setDaemon(true);
+            connection.start();
+
+            try {
+                this.wait();
+                if (connection_is_established) {
+                    while (true) {
+                        Thread.sleep(3);
+                        System.out.println("Type your message:");
+                        String data = ConsoleHelper.getStringFromConsole();
+                        if (data.equals("exit") || data.isEmpty())
+                            break;
+                        Message newMessageForServer = new Message(MessageType.TEXT, data);
+                        connectionWithServer.sendMessage(newMessageForServer);
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
      * Возвращает новый экземпляр внутреннего класса
      */
-    protected Client_Console_Connection_With_Server getConnectionWithServer() {
-        return new Client_Console_Connection_With_Server();
+    protected ProcessConnectionWithServer getConnectionWithServer() {
+        return new ProcessConnectionWithServer();
     }
 
-    //TODO дописать методы для ожидания воода в консоль и отправки на сервер
+    /**
+     * Запрос адреса сервера (ввод в консоль)
+     */
+    private String getServerAddress() {
+        System.out.print("Enter server address: ");
+        return ConsoleHelper.getStringFromConsole();
+    }
+
+    /**
+     * Запрос порта сервера (ввод в консоль)
+     */
+    private Integer getServerPort() {
+        System.out.print("Enter server port: ");
+        return ConsoleHelper.getIntFromConsole();
+    }
 }

@@ -136,7 +136,8 @@ public class Server {
             try {
                 Message messageFromClient = connection.receive();
                 if (messageFromClient != null && messageFromClient.getType() == MessageType.TEXT) {
-                    String newMessage = userName + ": " + messageFromClient.getData(); //что бы было видно от кого
+                    String newMessage = userName + ": "
+                            + messageFromClient.getData() + "\n---------------------------------------------------------"; //что бы было видно от кого
                     Server.broadcastForAllClients(new Message(MessageType.TEXT, newMessage));
                 }
             } catch (IOException | ClassNotFoundException e) {
