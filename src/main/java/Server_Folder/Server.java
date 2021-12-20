@@ -22,6 +22,11 @@ public class Server {
     }
 
 
+    /**
+     * Запуск сервера.
+     * Бесконечный цикл с ожиданием подключений от неограниченного числа клиентов, под каждого
+     * клиента создается экземпляр класса ServerHandlerForClients и запускается его нить.
+     */
     private void start() {
         System.out.print("Enter the port of the local server: ");
         ServerSocket serverSocket = null;
@@ -36,6 +41,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
             try {
+                Objects.requireNonNull(serverSocket);
                 serverSocket.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -45,7 +51,7 @@ public class Server {
 
     //----------------------------------------------------------------------------------------------------------
     public class ServerHandlerForClients extends Thread {
-        private Socket client_socket;
+        private final Socket client_socket;
 
 
         public ServerHandlerForClients(Socket client_socket) {
@@ -53,6 +59,15 @@ public class Server {
             this.client_socket = client_socket;
         }
 
+        /**
+         * Знакомство сервера с клиентом.
+         * 1)Обмен рукопожатиями - запрос имени клиента.
+         * 2)Оповещение клиента о всех, кто уже подключен.
+         * 3)Запуск бесконечного цикла для клиента (ожидание от него входящих сообщений и отправка их
+         * бродкастом.
+         * <p>
+         * 4)Удаление клиента из мапы клиентов, при дисконнекте клиента.
+         */
         @Override
         public void run() {
             System.out.println("New connection for new client: " + client_socket.getRemoteSocketAddress());
@@ -78,7 +93,7 @@ public class Server {
         /**
          * Метод обеспечивает запрос в сторону клиента, подразумевает запрос имени клиента и
          * проверку ответа от клиента на 'пустое' имя и 'null' + проверка на корректный тип сообщения,
-         * так как введен протокол обмена сообщениями.
+         * так как введен протокол обмена сообщениями (enum MessageType).
          */
         public String serverHandShake(Connection client_connection) {
             final Message REQUEST_NAME = new Message(MessageType.NAME_REQUEST);
@@ -116,8 +131,10 @@ public class Server {
         while (true) {
             try {
                 Message messageFromClient = connection.receive();
-                if (messageFromClient != null && messageFromClient.getType() == MessageType.TEXT)
-                    Server.broadcastForAllClients(messageFromClient);
+                if (messageFromClient != null && messageFromClient.getType() == MessageType.TEXT) {
+                    String newMessage = userName + ": " + messageFromClient.getData(); //что бы было видно от кого
+                    Server.broadcastForAllClients(new Message(MessageType.TEXT, newMessage));
+                }
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
