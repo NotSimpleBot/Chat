@@ -10,10 +10,12 @@ import java.io.IOException;
 public class Client_Console {
     protected boolean connection_is_established = false; //статус соединения
 
+
     public static void main(String[] args) {
         Client_Console client_console = new Client_Console();
         client_console.start();
     }
+
 
     //----------------------------------------------------------------------------------------------------------
     protected class Client_Console_Connection_With_Server extends Thread {
@@ -27,10 +29,17 @@ public class Client_Console {
 
 
         /**
-         * Метод для установки соединения с сервером, обмен первичными рукопожатиями
+         * Метод для установки соединения с сервером, обмен первичными рукопожатиями.
+         * <p>
+         * Ожидает ответа/запроса от сервера.
+         * <p>
+         * В случае успешного 'знакомства' поле 'connection_is_established' установится в true и произойдет
+         * выход из цикла.
+         *
+         * @param server_connection текущий клиент, вернее его соединение в сторону сервера
          */
         protected void clientHandShake(Connection server_connection) {
-            String userName = null;
+            String userName;
             Message messageFromServer;
             while (true) {
                 try {
@@ -45,6 +54,7 @@ public class Client_Console {
                             if (typeMessageFromServer == MessageType.NAME_ACCEPTED) {
                                 System.out.println("Name accepted !");
                                 this.setConnectionStatus(true);
+                                return;
                             } else throw new IOException("SomeProblemsWithConnection");
                         }
                     }
@@ -55,7 +65,9 @@ public class Client_Console {
         }
 
         /**
-         * Меняем статус соединения на переданный в аргументе
+         * Меняем статус соединения на переданный в аргументе.
+         * <p>
+         * + Освобождаем нить главного потока объекта Client_Console.this
          */
         protected void setConnectionStatus(boolean status) {
             synchronized (Client_Console.this) {
@@ -77,7 +89,7 @@ public class Client_Console {
     }
 
     /**
-     * Просто возвращает новый экземпляр внутреннего класса
+     * Возвращает новый экземпляр внутреннего класса
      */
     protected Client_Console_Connection_With_Server getConnectionWithServer() {
         return new Client_Console_Connection_With_Server();

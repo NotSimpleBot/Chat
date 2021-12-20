@@ -2,7 +2,7 @@ package Message;
 
 import java.io.Serializable;
 
-//Serializable так как будем передавать по сети сообщения в видео объектов.
+//Serializable так как будем передавать по сети сообщения в виде объектов
 public class Message implements Serializable {
     private final MessageType type;
     private final String data;

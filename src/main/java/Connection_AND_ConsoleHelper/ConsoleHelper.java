@@ -8,12 +8,20 @@ public class ConsoleHelper {
     private static final BufferedReader reader =
             new BufferedReader(new InputStreamReader(System.in));
 
-
+    /**
+     * Вывод в консоль строки из аргумента.
+     *
+     * @param str строка, будет выведена в консоль
+     */
     public static void printInConsole(String str) {
         System.out.println(str);
     }
 
-
+    /**
+     * Считывание данных с консоли, возвращает эти данные в формате String.
+     *
+     * @return String
+     */
     public static String getStringFromConsole() {
         String tmp_Str = null;
         try {
@@ -25,7 +33,11 @@ public class ConsoleHelper {
         return tmp_Str;
     }
 
-
+    /**
+     * Считывание данных с консоли, возвращает эти данные в формате Integer.
+     *
+     * @return Integer
+     */
     public static Integer getIntFromConsole() {
         Integer int_tmp = null;
         int count = 0;

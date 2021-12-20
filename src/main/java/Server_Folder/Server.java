@@ -24,6 +24,7 @@ public class Server {
 
     /**
      * Запуск сервера.
+     * <p>
      * Бесконечный цикл с ожиданием подключений от неограниченного числа клиентов, под каждого
      * клиента создается экземпляр класса ServerHandlerForClients и запускается его нить.
      */
@@ -51,7 +52,7 @@ public class Server {
 
     //----------------------------------------------------------------------------------------------------------
     public class ServerHandlerForClients extends Thread {
-        private final Socket client_socket;
+        private final Socket client_socket; //соединение в сторону клиента
 
 
         public ServerHandlerForClients(Socket client_socket) {
@@ -61,8 +62,11 @@ public class Server {
 
         /**
          * Знакомство сервера с клиентом.
+         * <p>
          * 1)Обмен рукопожатиями - запрос имени клиента.
+         * <p>
          * 2)Оповещение клиента о всех, кто уже подключен.
+         * <p>
          * 3)Запуск бесконечного цикла для клиента (ожидание от него входящих сообщений и отправка их
          * бродкастом.
          * <p>
@@ -78,7 +82,7 @@ public class Server {
 
                 Server.broadcastForAllClients(new Message(MessageType.USER_ADD, userName));
                 notifyUser(connection_client, userName);
-                serverMainLoopForClient(connection_client, userName);
+                Server.this.serverMainLoopForClient(connection_client, userName);
 
             } catch (IOException e) {
                 e.printStackTrace();
