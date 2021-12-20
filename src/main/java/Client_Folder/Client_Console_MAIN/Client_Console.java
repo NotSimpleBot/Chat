@@ -8,6 +8,7 @@ import Message.MessageType;
 import java.io.IOException;
 
 public class Client_Console {
+    protected Connection connectionWithServer;
     protected boolean connection_is_established = false; //статус соединения
 
 
@@ -20,6 +21,7 @@ public class Client_Console {
     //----------------------------------------------------------------------------------------------------------
     protected class Client_Console_Connection_With_Server extends Thread {
         //TODO установка соединения с сервером
+
 
 
         @Override
@@ -63,6 +65,31 @@ public class Client_Console {
                 }
             }
         }
+
+        /***/
+        protected void mainClientLoopForMessageFromServer(){
+            Message messageFromServer;
+            while (true){
+                try {
+                    messageFromServer = connectionWithServer.receive();
+                    if (messageFromServer != null){
+                        MessageType messageFromServerType = messageFromServer.getType();
+                        if (messageFromServerType == MessageType.TEXT){
+        //TODO
+                        }
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        /**Вывод сообщения с сервера в консоль.*/
+        protected void incomingMessage(Message messageFromServer){
+            String message = messageFromServer.getData();
+            ConsoleHelper.printInConsole(message);
+        }
+
 
         /**
          * Меняем статус соединения на переданный в аргументе.
