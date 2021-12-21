@@ -9,6 +9,11 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Client_Console {
+    /*
+    Класс отвечает за:
+    1) Установку соединения с сервером через внутренний класс;
+    2) Бесконечный цикл ожидания ввода сообщения от клиента и отправка его на сервер.
+     */
     protected Connection connectionWithServer;
     protected boolean connection_is_established = false; //статус соединения
 
@@ -21,6 +26,12 @@ public class Client_Console {
 
     //----------------------------------------------------------------------------------------------------------
     protected class ProcessConnectionWithServer extends Thread {
+        /*
+        Класс отвечает за:
+        1) Установка соединения с сервером;
+        2) Бесконечное ожидание сообщений от сервера;
+        3) Вывод данных о сообщениях в консоль.
+         */
 
         @Override
         public void run() {
@@ -60,8 +71,7 @@ public class Client_Console {
                     if (messageFromServer != null) {
                         final MessageType typeMessageFromServer = messageFromServer.getType();
                         if (typeMessageFromServer == MessageType.NAME_REQUEST) {
-                            System.out.print("Enter userName: ");
-                            userName = ConsoleHelper.getStringFromConsole();
+                            userName = Client_Console.this.getUserName();
                             server_connection.sendMessage(new Message(MessageType.USER_NAME, userName));
                         } else {
                             if (typeMessageFromServer == MessageType.NAME_ACCEPTED) {
@@ -156,14 +166,15 @@ public class Client_Console {
             try {
                 this.wait();
                 if (connection_is_established) {
+                    Thread.sleep(1);
+                    System.out.println("Type your first message:");
                     while (true) {
-                        Thread.sleep(3);
-                        System.out.println("Type your message:");
+
                         String data = ConsoleHelper.getStringFromConsole();
                         if (data.equals("exit") || data.isEmpty())
                             break;
-                        Message newMessageForServer = new Message(MessageType.TEXT, data);
-                        connectionWithServer.sendMessage(newMessageForServer);
+                        if (shouldSendTextFromConsole())
+                            sendTextMessage(data);
                     }
                 }
             } catch (InterruptedException e) {
@@ -171,6 +182,21 @@ public class Client_Console {
             }
         }
     }
+
+    /**
+     * Отправить сообщение серверу
+     */
+    protected void sendTextMessage(String messageForServer){
+        System.out.println("---------------------------------------------------------\n" +
+                "New message: ");
+        try {
+            connectionWithServer.sendMessage(new Message(MessageType.TEXT, messageForServer));
+        } catch (Exception e) {
+            e.printStackTrace();
+            connection_is_established = false;
+        }
+    }
+
 
     /**
      * Возвращает новый экземпляр внутреннего класса
@@ -182,7 +208,7 @@ public class Client_Console {
     /**
      * Запрос адреса сервера (ввод в консоль)
      */
-    private String getServerAddress() {
+    protected String getServerAddress() {
         System.out.print("Enter server address: ");
         return ConsoleHelper.getStringFromConsole();
     }
@@ -190,8 +216,27 @@ public class Client_Console {
     /**
      * Запрос порта сервера (ввод в консоль)
      */
-    private Integer getServerPort() {
+    protected Integer getServerPort() {
         System.out.print("Enter server port: ");
         return ConsoleHelper.getIntFromConsole();
+    }
+
+    /**
+     * Запрос имени пользователя (ввод в консоль)
+     */
+    protected String getUserName(){
+        System.out.print("Enter user name: ");
+        return ConsoleHelper.getStringFromConsole();
+    }
+
+    /**
+     * Будем отправлять сообщение от клиента на сервер ?
+     * <p>
+     * Актуально для бота, например.
+     *
+     * @return true/false - будем/не будем.
+     */
+    protected boolean shouldSendTextFromConsole() {
+        return true;
     }
 }
