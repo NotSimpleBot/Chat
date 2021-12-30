@@ -189,7 +189,7 @@ public class Client_Console {
     /**
      * Отправить сообщение серверу
      */
-    protected void sendTextMessage(String messageForServer) {
+    public void sendTextMessage(String messageForServer) {
         System.out.println("---------------------------------------------------------\n" +
                 "New message: ");
         try {
