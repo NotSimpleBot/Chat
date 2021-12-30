@@ -157,7 +157,7 @@ public class Client_Console {
                 this.wait();
                 if (connection_is_established) {
                     while (true) {
-                        Thread.sleep(3);
+                        Thread.sleep(1);
                         System.out.println("Type your message:");
                         String data = ConsoleHelper.getStringFromConsole();
                         if (data.equals("exit") || data.isEmpty())
