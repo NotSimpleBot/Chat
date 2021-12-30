@@ -30,7 +30,6 @@ public class Client_Bot extends Client_Console {
 
         @Override
         protected void incomingMessage(Message messageFromServer) {
-
             ConsoleHelper.printInConsole(messageFromServer.getData());
             SimpleDateFormat dateFormat = null;
             Calendar data = null;
@@ -40,34 +39,38 @@ public class Client_Bot extends Client_Console {
             if (nameAndMessage.length != 2)
                 return;
 
-            if (nameAndMessage[1].equalsIgnoreCase("date") || nameAndMessage[1].equalsIgnoreCase("дата")) {
+            String user_name = nameAndMessage[0];
+            String message_command = nameAndMessage[1];
+
+            if (message_command.equalsIgnoreCase("date") || message_command.equalsIgnoreCase("дата")) {
                 dateFormat = new SimpleDateFormat("d.MM.yyyy");
                 data = Calendar.getInstance();
-            } else if (nameAndMessage[1].equalsIgnoreCase("day") || nameAndMessage[1].equalsIgnoreCase("день")) {
+            } else if (message_command.equalsIgnoreCase("day") || message_command.equalsIgnoreCase("день")) {
                 dateFormat = new SimpleDateFormat("d");
                 data = Calendar.getInstance();
-            } else if (nameAndMessage[1].equalsIgnoreCase("month") || nameAndMessage[1].equalsIgnoreCase("месяц")) {
+            } else if (message_command.equalsIgnoreCase("month") || message_command.equalsIgnoreCase("месяц")) {
                 dateFormat = new SimpleDateFormat("MMMM");
                 data = Calendar.getInstance();
-            } else if (nameAndMessage[1].equalsIgnoreCase("year") || nameAndMessage[1].equalsIgnoreCase("год")) {
+            } else if (message_command.equalsIgnoreCase("year") || message_command.equalsIgnoreCase("год")) {
                 dateFormat = new SimpleDateFormat("yyyy");
                 data = Calendar.getInstance();
-            } else if (nameAndMessage[1].equalsIgnoreCase("time") || nameAndMessage[1].equalsIgnoreCase("время")) {
+            } else if (message_command.equalsIgnoreCase("time") || message_command.equalsIgnoreCase("время")) {
                 dateFormat = new SimpleDateFormat("H:mm:ss");
                 data = Calendar.getInstance();
-            } else if (nameAndMessage[1].equalsIgnoreCase("hour") || nameAndMessage[1].equalsIgnoreCase("час")) {
+            } else if (message_command.equalsIgnoreCase("hour") || message_command.equalsIgnoreCase("час")) {
                 dateFormat = new SimpleDateFormat("H");
                 data = Calendar.getInstance();
-            } else if (nameAndMessage[1].equalsIgnoreCase("minutes") || nameAndMessage[1].equalsIgnoreCase("минуты")) {
+            } else if (message_command.equalsIgnoreCase("minutes") || message_command.equalsIgnoreCase("минуты")) {
                 dateFormat = new SimpleDateFormat("m");
                 data = Calendar.getInstance();
-            } else if (nameAndMessage[1].equalsIgnoreCase("seconds") || nameAndMessage[1].equalsIgnoreCase("секунды")) {
+            } else if (message_command.equalsIgnoreCase("seconds") || message_command.equalsIgnoreCase("секунды")) {
                 dateFormat = new SimpleDateFormat("s");
                 data = Calendar.getInstance();
             }
             if (dateFormat != null && data != null) {
-                Client_Bot.this.sendTextMessage("INFO for " + nameAndMessage[0] + ": "
+                Client_Bot.this.sendTextMessage("INFO for " + user_name + ": "
                         + dateFormat.format(data.getTime()));
+                //TODO: тут баг, так как не смотря на флаг все равно отправим на сервак
             }
         }
     }

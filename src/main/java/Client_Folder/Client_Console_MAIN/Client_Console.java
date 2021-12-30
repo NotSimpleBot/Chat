@@ -7,13 +7,14 @@ import Message.MessageType;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
+/*
+Класс отвечает за:
+1) Установку соединения с сервером через внутренний класс;
+2) Бесконечный цикл ожидания ввода сообщения от клиента и отправка его на сервер.
+ */
 public class Client_Console {
-    /*
-    Класс отвечает за:
-    1) Установку соединения с сервером через внутренний класс;
-    2) Бесконечный цикл ожидания ввода сообщения от клиента и отправка его на сервер.
-     */
     protected Connection connectionWithServer;
     protected boolean connection_is_established = false; //статус соединения
 
@@ -127,7 +128,6 @@ public class Client_Console {
          * Вывод инфы о добавленном юзере в консоль
          */
         protected void incomingMessageAddUser(Message messageFromServer) {
-            String message = messageFromServer.getData();
             System.out.println("New user '" + messageFromServer.getData() + "' connected");
         }
 
@@ -164,22 +164,22 @@ public class Client_Console {
             connection.start();
 
             try {
-                this.wait();
-                if (connection_is_established) {
-                    Thread.sleep(1);
-                    System.out.println("Type your first message:");
-                    while (true) {
+                while (!connection_is_established)
+                    this.wait(); //демон выше должен пробудить (если установит соединение с сервером)
+                TimeUnit.SECONDS.sleep(1);
 
-                        Thread.sleep(1);
-                        System.out.println("Type your message:");
+                System.out.println("Type your first message:");
+                while (true) {
+                    TimeUnit.SECONDS.sleep(1);
+                    System.out.println("Type your message:");
 
-                        String data = ConsoleHelper.getStringFromConsole();
-                        if (data.equals("exit") || data.isEmpty())
-                            break;
-                        if (shouldSendTextFromConsole())
-                            sendTextMessage(data);
-                    }
+                    String data = ConsoleHelper.getStringFromConsole();
+                    if (data.equals("exit") || data.isEmpty())
+                        break;
+                    if (shouldSendTextFromConsole())
+                        sendTextMessage(data);
                 }
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -189,7 +189,7 @@ public class Client_Console {
     /**
      * Отправить сообщение серверу
      */
-    protected void sendTextMessage(String messageForServer){
+    protected void sendTextMessage(String messageForServer) {
         System.out.println("---------------------------------------------------------\n" +
                 "New message: ");
         try {
@@ -227,7 +227,7 @@ public class Client_Console {
     /**
      * Запрос имени пользователя (ввод в консоль)
      */
-    protected String getUserName(){
+    protected String getUserName() {
         System.out.print("Enter user name: ");
         return ConsoleHelper.getStringFromConsole();
     }
